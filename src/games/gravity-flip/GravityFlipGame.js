@@ -7,8 +7,8 @@ import { EVENTS } from '../../core/Events.js';
 
 function rand(min, max) { return min + Math.random() * (max - min); }
 
-const PLAYER_SPRITE = 'https://i.supaimg.com/92a3b603-2eb1-4604-ac92-569047989f8c/53b42d89-b07e-4b14-87ee-8fe3f4c7929d.png';
-const OBSTACLE_SPRITE = 'https://i.supaimg.com/92a3b603-2eb1-4604-ac92-569047989f8c/0c65a3b6-5bae-436a-958f-8525f037ba75.png';
+const PLAYER_SPRITE = 'assets/images/gravity-flip-player.png';
+const OBSTACLE_SPRITE = 'assets/images/gravity-flip-obstacle.png';
 
 /**
  * GravityFlipGame.js
@@ -101,6 +101,16 @@ export default class GravityFlipGame extends BaseGame {
     // Deep maroon-pink gradient (was a flat bright pink) -- darker per
     // spec, edge-to-edge with no letterbox gap.
     drawGradientBackground(ctx, W, H, [[0, '#4a0f2e'], [0.6, '#26071a'], [1, '#08030a']]);
+    // Floating particles between floors
+    ctx.save();
+    for (let i = 0; i < 40; i++) {
+      const px = (i * 67 + this.distance * 0.5) % W;
+      const py = 100 + (i * 37) % 340;
+      ctx.globalAlpha = 0.2 + (i % 4) * 0.1;
+      ctx.fillStyle = (i % 3 === 0) ? '#ffb0e0' : '#8fe8ff';
+      ctx.beginPath(); ctx.arc(px, py, (i % 3 === 0) ? 2 : 1, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
 
     ctx.save();
     ctx.strokeStyle = 'rgba(143,232,255,0.3)';
