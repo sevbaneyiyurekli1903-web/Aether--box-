@@ -163,6 +163,18 @@ export default class BrickQuestGame extends BaseGame {
     // Deep burnt-orange gradient (was a flat bright orange) -- darker
     // per spec, edge-to-edge with no letterbox gap.
     drawGradientBackground(ctx, W, H, [[0, '#4a2b06'], [0.6, '#241503'], [1, '#0a0602']]);
+    // Brick wall pattern
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,160,60,0.08)';
+    ctx.lineWidth = 2;
+    const brickH = 28, brickW = 56;
+    for (let by = 0; by < H; by += brickH) {
+      const offset = (Math.floor(by / brickH) % 2 === 0) ? 0 : brickW / 2;
+      for (let bx = -brickW; bx < W; bx += brickW) {
+        ctx.strokeRect(bx + offset, by, brickW - 2, brickH - 2);
+      }
+    }
+    ctx.restore();
 
     for (const b of this.bricks) {
       const bx = this.brickX(b.col), by = this.brickY(b.row);
