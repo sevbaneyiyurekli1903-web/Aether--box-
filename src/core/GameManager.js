@@ -2,6 +2,22 @@ import bus from './EventBus.js';
 import { EVENTS } from './Events.js';
 import { GAME_REGISTRY } from '../data/gameRegistry.js';
 
+/**
+ * GameManager.js
+ * -----------------------------------------------------------------
+ * Owns the top-level app state machine (which screen/mode we're in),
+ * the lifecycle of whichever mini-game is currently active, and the
+ * shared score/combo/high-score bookkeeping every game reports
+ * through instead of implementing its own.
+ *
+ * GameManager never touches the DOM and never touches audio. It only
+ * knows about: the game registry, the active game instance (via the
+ * BaseGame contract), and the EventBus. That's the whole point of the
+ * decoupling — UIManager and AudioManager react to what GameManager
+ * announces; GameManager never reaches into either of them.
+ * -----------------------------------------------------------------
+ */
+
 export const AppState = Object.freeze({
   MAIN_MENU: 'MAIN_MENU',
   GAME_SELECT: 'GAME_SELECT',
@@ -9,6 +25,9 @@ export const AppState = Object.freeze({
   IN_GAME: 'IN_GAME'
 });
 
+// Score thresholds that fire the announcer system (section 3.4 of the
+// spec). Kept here rather than in AudioManager because "when do we
+// celebrate" is game-flow logic, not an audio concern.
 const SCORE_ANNOUNCER_THRESHOLDS = [100, 500, 1000, 5000];
 
 class GameManager {
@@ -22,18 +41,24 @@ class GameManager {
     this._rafId = null;
     this._lastTime = 0;
     this._announcedThisRun = new Set();
+    // In-memory fallback so high scores still work for the current
+    // session even if localStorage throws (private browsing, a
+    // sandboxed preview, etc.) -- only localStorage survives a reload,
+    // but this prevents the display from wrongly regressing to 0
+    // mid-session just because storage happens to be blocked.
     this._highScoreCache = new Map();
 
+    // Infinite Ad Mode: when on, a repeating interstitial fires every
+    // ~25s while a game is active, independent of the revive/joker ad
+    // flows. Only runs while state === IN_GAME (see _syncAdModeTimer).
     this._infiniteAdMode = false;
     this._adModeIntervalId = null;
 
+    // GameManager only reacts to *requests*; it doesn't know or care
+    // which button or screen made the request.
     bus.on(EVENTS.NAV_SHOW_MAIN_MENU, () => this.showMainMenu());
     bus.on(EVENTS.NAV_SHOW_GAME_SELECT, () => this.showGameSelect());
-    bus.on(EVENTS.NAV_LOAD_GAME, (gameId) => {
-      // Loading + Play screen flow handled by UIManager
-      // Just store pending game id
-    });
-    bus.on(EVENTS.PLAY_SCREEN_CONFIRMED, (gameId) => this.loadGame(gameId));
+    bus.on(EVENTS.NAV_LOAD_GAME, (gameId) => this.loadGame(gameId));
 
     bus.on(EVENTS.SETTINGS_CHANGED, (settings) => {
       if (settings && typeof settings.infiniteAdMode === 'boolean') {
@@ -42,13 +67,18 @@ class GameManager {
       }
     });
 
+    // Revive flow: a game calls playerLost() instead of ending
+    // directly; the actual end/restart only happens once the player
+    // (or the 5s timeout in ReviveOverlay) decides.
     bus.on(EVENTS.REVIVE_ACCEPTED, () => this._handleReviveAccepted());
     bus.on(EVENTS.REVIVE_DECLINED, () => this._handleReviveDeclined());
 
     bus.on(EVENTS.AD_JOKER_REQUESTED, (jokerId) => this._handleJokerRequested(jokerId));
 
+    // Stub for a real IAP flow later — kept here (not in UIManager) since
+    // "did the purchase succeed" is app-state logic, not a UI concern.
     bus.on(EVENTS.REMOVE_ADS_REQUESTED, () => {
-      console.log('GameManager: Remove Ads requested');
+      console.log('GameManager: Remove Ads requested — wire up your IAP SDK here.');
     });
   }
 
@@ -67,6 +97,12 @@ class GameManager {
     this.state = AppState.SETTINGS;
   }
 
+  /**
+   * Look a game up in the registry, lazy-load its module, instantiate
+   * it, and start the shared update loop. Any object honoring the
+   * BaseGame contract (init/update/render/destroy) works here — the
+   * game's internals are invisible to GameManager.
+   */
   async loadGame(gameId) {
     const entry = GAME_REGISTRY.find((g) => g.id === gameId);
     if (!entry || entry.comingSoon) {
@@ -111,6 +147,7 @@ class GameManager {
     bus.emit(EVENTS.GAME_RESUMED);
   }
 
+  /** Called by the active game (via its BaseGame instance) on scoring events. */
   addScore(points) {
     this.score += points;
     bus.emit(EVENTS.SCORE_CHANGED, this.score);
@@ -128,6 +165,12 @@ class GameManager {
     bus.emit(EVENTS.COMBO_CHANGED, this.combo);
   }
 
+  /**
+   * Called by the active game when the player dies — NOT the same as
+   * ending the run. This freezes the loop and hands off to the
+   * ad-revive overlay; _handleReviveAccepted/_handleReviveDeclined
+   * decide what actually happens next.
+   */
   playerLost() {
     if (this.state !== AppState.IN_GAME) return;
     this._reviveOfferPending = true;
@@ -141,9 +184,13 @@ class GameManager {
       const stored = Number(localStorage.getItem(`aetherhub:highscore:${gameId}`) || 0);
       return Math.max(cached, stored);
     } catch {
-      return cached;
+      return cached; // storage unavailable -- still have this session's best, if any
     }
   }
+
+  // -----------------------------------------------------------------
+  // internals
+  // -----------------------------------------------------------------
 
   async _handleReviveAccepted() {
     await this._simulateAdView();
@@ -156,9 +203,16 @@ class GameManager {
   }
 
   _handleReviveDeclined() {
+    // Finalize this run's score against the persisted high score...
     this._saveHighScore(this.activeGameId, this.score);
     bus.emit(EVENTS.GAME_OVER, { gameId: this.activeGameId, score: this.score });
 
+    // ...then restart the SAME game from the beginning, per spec.
+    // IMPORTANT: destroy() before init() — a game's init() creates its
+    // own canvas/wrapper via createGameCanvas(root); without tearing
+    // the old one down first, this stacks a second canvas on top of
+    // the first, which is what was distorting the layout after
+    // "No Thanks".
     this._reviveOfferPending = false;
     this.score = 0;
     this.combo = 0;
@@ -182,6 +236,12 @@ class GameManager {
     bus.emit(EVENTS.AD_JOKER_GRANTED, jokerId);
   }
 
+  /**
+   * Stand-in for a real rewarded-ad SDK call (AdMob, Unity Ads, IronSource,
+   * ...). Every caller above only cares that the returned promise
+   * resolves once the "ad" finishes — swap this one function out when
+   * wiring a real SDK and nothing else in the app needs to change.
+   */
   _simulateAdView(durationMs = 1200) {
     return new Promise((resolve) => setTimeout(resolve, durationMs));
   }
@@ -195,6 +255,7 @@ class GameManager {
       const prev = Number(localStorage.getItem(key) || 0);
       if (score > prev) localStorage.setItem(key, String(score));
     } catch {
+      // Non-fatal: the in-memory cache above still covers this session.
     }
   }
 
@@ -211,7 +272,7 @@ class GameManager {
     this._lastTime = performance.now();
     const tick = (t) => {
       this._rafId = requestAnimationFrame(tick);
-      const dt = Math.min((t - this._lastTime) / 16.6667, 3);
+      const dt = Math.min((t - this._lastTime) / 16.6667, 3); // dt === 1 at steady 60fps
       this._lastTime = t;
       if (this.activeGame) this.activeGame.update(dt);
     };
@@ -219,6 +280,11 @@ class GameManager {
     this._syncAdModeTimer();
   }
 
+  /** Starts/stops the repeating Infinite Ad Mode interstitial in
+   *  lockstep with the game loop -- called from _startLoop() so every
+   *  call site (loadGame, resumeGame, revive-accept, revive-decline)
+   *  automatically stays correct without needing its own copy of this
+   *  logic. */
   _syncAdModeTimer() {
     if (this._adModeIntervalId) {
       clearInterval(this._adModeIntervalId);
