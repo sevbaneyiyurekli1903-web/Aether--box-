@@ -2,8 +2,8 @@ import bus from '../../core/EventBus.js';
 import { EVENTS } from '../../core/Events.js';
 import i18n from '../../core/I18nManager.js';
 
-// Local logo asset for offline/APK compatibility
-const LOGO_URL = 'assets/images/logo.png';
+// The crystal logo the whole new theme is based on.
+const LOGO_URL = 'assets/images/logo-menu.png';
 
 /**
  * MainMenuScreen.js
