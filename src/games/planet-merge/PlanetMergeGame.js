@@ -1,6 +1,6 @@
 import { BaseGame } from '../BaseGame.js';
 import { createGameCanvas, attachPointerEvents, drawGradientBackground } from '../canvasInput.js';
-import { preload, drawSprite } from '../imageLoader.js';
+import { preload, drawCircularSprite } from '../imageLoader.js';
 import gameManager from '../../core/GameManager.js';
 import bus from '../../core/EventBus.js';
 import { EVENTS } from '../../core/Events.js';
@@ -305,15 +305,31 @@ export default class PlanetMergeGame extends BaseGame {
     const ctx = this.ctx;
     const W = this.canvas.width, H = this.canvas.height;
 
+    // Deep space gradient with nebula feel
     drawGradientBackground(ctx, W, H, [[0, '#0a0e2e'], [0.55, '#05081c'], [1, '#020208']]);
 
+    // Draw distant stars with twinkle
     ctx.save();
-    ctx.fillStyle = '#ffffff';
-    for (let i = 0; i < 80; i++) {
+    for (let i = 0; i < 120; i++) {
       const sx = (i * 173) % W;
       const sy = (i * 91) % H;
-      ctx.globalAlpha = 0.15 + (i % 5) * 0.15;
-      ctx.fillRect(sx, sy, (i % 3 === 0) ? 2 : 1, (i % 3 === 0) ? 2 : 1);
+      const twinkle = 0.15 + (Math.sin(performance.now() * 0.001 + i) + 1) * 0.25;
+      ctx.globalAlpha = twinkle;
+      ctx.fillStyle = (i % 7 === 0) ? '#c3a6ff' : (i % 5 === 0) ? '#8fe8ff' : '#ffffff';
+      const sz = (i % 3 === 0) ? 2 : 1;
+      ctx.fillRect(sx, sy, sz, sz);
+    }
+    ctx.restore();
+
+    // Draw subtle grid lines
+    ctx.save();
+    ctx.strokeStyle = 'rgba(143, 232, 255, 0.04)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < W; x += 36) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+    }
+    for (let y = 0; y < H; y += 36) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
     }
     ctx.restore();
 
@@ -385,7 +401,8 @@ export default class PlanetMergeGame extends BaseGame {
 
     const imgList = isStar ? STAR_IMAGES : MOON_IMAGES;
     const url = imgList[(level - 1) % imgList.length];
-    const drew = drawSprite(ctx, url, x, y, r * 2, r * 2);
+    // Use drawCircularSprite for perfect circular fit matching the physics radius
+    const drew = drawCircularSprite(ctx, url, x, y, r * 2.1);
 
     if (!drew) {
       const c = FALLBACK_COLORS[(level - 1) % FALLBACK_COLORS.length];
