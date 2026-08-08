@@ -8,7 +8,7 @@ import { EVENTS } from '../../core/Events.js';
 function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 function rand(min, max) { return min + Math.random() * (max - min); }
 
-const PLAYER_SPRITE = 'https://i.supaimg.com/92a3b603-2eb1-4604-ac92-569047989f8c/be61f716-2b63-4ac6-bbc2-0d0eaa6f9f6d.png';
+const PLAYER_SPRITE = 'assets/images/gravity-pulse-player.png';
 
 /**
  * GravityPulseGame.js
@@ -106,6 +106,20 @@ export default class GravityPulseGame extends BaseGame {
     // Deep red gradient (was a flat bright red) -- darker per spec,
     // edge-to-edge with no letterbox gap.
     drawGradientBackground(ctx, W, H, [[0, '#4a0e0e'], [0.6, '#260707'], [1, '#080202']]);
+    // Energy pulse lines
+    ctx.save();
+    ctx.strokeStyle = 'rgba(195,166,255,0.1)';
+    ctx.lineWidth = 2;
+    const time = performance.now() * 0.002;
+    for (let i = 0; i < 6; i++) {
+      ctx.beginPath();
+      for (let x = 0; x < W; x += 5) {
+        const y = H / 2 + Math.sin(x * 0.02 + time + i) * (40 + i * 15);
+        if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+    }
+    ctx.restore();
 
     for (const o of this.obstacles) {
       ctx.save();
