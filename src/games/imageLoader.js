@@ -41,6 +41,8 @@ export function drawCircularSprite(ctx, url, x, y, diameter) {
   const entry = cache.get(url) || loadOne(url);
   if (!entry.loaded) return false;
   ctx.save();
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
   ctx.beginPath();
   ctx.arc(x, y, diameter / 2, 0, Math.PI * 2);
   ctx.clip();
@@ -55,6 +57,8 @@ export function drawSprite(ctx, url, x, y, width, height, rotation = 0) {
   const entry = cache.get(url) || loadOne(url);
   if (!entry.loaded) return false;
   ctx.save();
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
   ctx.translate(x, y);
   ctx.rotate(rotation);
   ctx.drawImage(entry.image, -width / 2, -height / 2, width, height);
