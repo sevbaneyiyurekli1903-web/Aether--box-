@@ -215,6 +215,24 @@ export default class TetrisGame extends BaseGame {
     // since the canvas cover-fits the full screen with no gap left
     // around it.
     drawGradientBackground(ctx, W, H, [[0, '#4a3a08'], [0.55, '#241c06'], [1, '#0a0803']]);
+    // Tetris grid pattern
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,220,100,0.06)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < W; x += 31) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+    }
+    for (let y = 0; y < H; y += 31) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    }
+    // Floating ghost pieces
+    ctx.fillStyle = 'rgba(255,220,100,0.04)';
+    for (let i = 0; i < 12; i++) {
+      const gx = (i * 97 + 30) % W;
+      const gy = (i * 53 + 40) % H;
+      ctx.fillRect(gx, gy, 28, 28);
+    }
+    ctx.restore();
 
     // board frame
     ctx.save();
