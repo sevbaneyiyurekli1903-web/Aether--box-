@@ -4,6 +4,21 @@ import { GAME_REGISTRY } from '../../data/gameRegistry.js';
 import gameManager from '../../core/GameManager.js';
 import i18n from '../../core/I18nManager.js';
 
+/**
+ * GameSelectScreen.js  --  the "Intermediate Menu"
+ * -----------------------------------------------------------------
+ * Fully data-driven: this file knows nothing about any individual
+ * game's rules, art style, or mechanics -- only the registry entries
+ * (id, title, card art, high score). Adding a 10th game never touches
+ * this file; it only touches gameRegistry.js.
+ *
+ * Decoupling in practice: clicking a card does not call into
+ * GameManager directly. It emits EVENTS.NAV_LOAD_GAME on the shared
+ * bus. GameManager happens to be listening, but this file doesn't
+ * know or care that it is -- swap GameManager out entirely and this
+ * screen doesn't need a single line changed.
+ * -----------------------------------------------------------------
+ */
 export class GameSelectScreen {
   constructor() {
     this.element = null;
@@ -35,6 +50,7 @@ export class GameSelectScreen {
     this._applyTranslations();
     bus.on(EVENTS.LANGUAGE_CHANGED, () => {
       this._applyTranslations();
+      // card badges ("BEST ###") are language-dependent text too
       if (!this.element.classList.contains('hidden')) this.onShow();
     });
 
@@ -46,6 +62,8 @@ export class GameSelectScreen {
     this._heading.textContent = i18n.t('selectModule');
   }
 
+  /** Called by UIManager whenever this screen becomes visible -- refresh
+   *  high scores in case a run just finished. */
   onShow() {
     this._grid.replaceChildren(
       ...GAME_REGISTRY.map((entry) => this._buildCard(entry))
@@ -64,23 +82,13 @@ export class GameSelectScreen {
     art.src = entry.cardArt;
     art.alt = entry.title;
     art.loading = 'lazy';
-    art.addEventListener('error', () => {
-      art.style.display = 'none';
-    }, { once: true });
+    // If a card art URL 404s or is unreachable, fail visibly instead of
+    // showing a broken-image icon inside a premium 3D card.
+    art.addEventListener('error', () => card.classList.add('game-card--art-error'), { once: true });
 
-    const info = document.createElement('div');
-    info.className = 'game-card-info';
-
-    const title = document.createElement('span');
-    title.className = 'game-card-title';
-    title.textContent = entry.title;
-
-    const sub = document.createElement('span');
-    sub.className = 'game-card-sub';
-    sub.textContent = entry.comingSoon ? 'Coming Soon' : 'Tap to Play';
-
-    info.append(title, sub);
-    card.append(art, info);
+    // No visible text label under the art per spec -- aria-label above
+    // covers accessibility without adding a rendered label element.
+    card.appendChild(art);
 
     if (!entry.comingSoon) {
       const best = gameManager.getHighScore(entry.id);
