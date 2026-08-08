@@ -92,6 +92,18 @@ export default class ColorSwitchGame extends BaseGame {
     // Deep forest-green gradient (was a flat bright green) -- darker
     // per spec, edge-to-edge with no letterbox gap.
     drawGradientBackground(ctx, W, H, [[0, '#0e3d1a'], [0.6, '#071f0d'], [1, '#020a04']]);
+    // Color rings
+    ctx.save();
+    const colors = ['#8fe8ff22', '#ffb0e022', '#ffd88a22'];
+    for (let i = 0; i < 8; i++) {
+      const cx = (i * 113 + 50) % W;
+      const cy = (i * 79 + 60) % H;
+      const r = 20 + (i % 4) * 15;
+      ctx.strokeStyle = colors[i % 3];
+      ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+    }
+    ctx.restore();
 
     for (const o of this.obstacles) {
       ctx.save();
