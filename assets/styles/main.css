@@ -5,7 +5,7 @@
    rounded 3D buttons/cards instead of thin glowing borders.
    ========================================================= */
 
-@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Poppins:wght@400;500;600&display=swap');
+@import url('../fonts/fonts.css');
 
 :root {
   /* deep blue gradient stops */
@@ -151,10 +151,7 @@ body {
   display: block;
   box-sizing: border-box;
   appearance: none;
-  -webkit-appearance: none; /* mobile WebViews sometimes keep native button
-    padding/border even after padding:0 unless appearance is explicitly
-    reset -- this was a likely second contributor to the misalignment
-    alongside the percentage-height issue fixed below */
+  -webkit-appearance: none;
   border: none;
   border-radius: 20px;
   overflow: hidden;
@@ -162,8 +159,8 @@ body {
   padding: 0;
   margin: 0;
   width: 100%;
-  height: 92px; /* fixed banner height instead of a square aspect-ratio,
-    now that cards are full-width rows in a single column */
+  height: auto;
+  min-height: 110px;
   flex: 0 0 auto;
   background: var(--panel-deep);
   box-shadow:
@@ -439,13 +436,6 @@ body {
   background: #02040c;
 }
 .game-canvas-wrapper canvas {
-  /* JS (canvasInput.js) sets explicit width/height in px, computed as
-     a "cover" fit -- scaled up until BOTH axes fill this wrapper,
-     cropping whichever axis overflows. Centered via transform so the
-     crop trims evenly from both sides rather than one. This is what
-     removes the dark bars that used to appear around the play area:
-     there is no leftover gap for the wrapper's own background to show
-     through, on any aspect ratio. */
   position: absolute;
   top: 50%;
   left: 50%;
@@ -453,154 +443,84 @@ body {
   display: block;
   touch-action: none;
 }
-
-
 /* ================= Loading Screen ================= */
 .loading-overlay {
   position: fixed;
   inset: 0;
   z-index: 100;
-  background: #000;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: #02040c;
+  transition: opacity 0.4s ease;
+}
+.loading-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
 }
 .loading-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
+  object-position: center;
 }
 
 /* ================= Play Screen ================= */
 .play-overlay {
   position: fixed;
   inset: 0;
-  z-index: 90;
+  z-index: 40;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(ellipse at 50% 0%, #1c2f7a 0%, #101a5c 48%, #04081c 100%);
+  background: rgba(4, 8, 28, 0.92);
+  backdrop-filter: blur(4px);
+  transition: opacity 0.3s ease;
+}
+.play-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
 }
 .play-panel {
+  width: min(78vw, 300px);
+  background: linear-gradient(160deg, #33469e 0%, var(--panel-deep) 100%);
+  border-radius: 28px;
+  padding: 36px 24px 30px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 30px;
+  gap: 22px;
+  box-shadow: 0 18px 40px rgba(2, 4, 16, 0.6), 0 2px 0 rgba(255, 255, 255, 0.15) inset;
 }
 .play-title {
   font-family: 'Baloo 2', sans-serif;
   font-weight: 800;
-  font-size: 3rem;
-  color: var(--cyan);
-  text-shadow: 0 0 30px rgba(143, 232, 255, 0.6);
+  font-size: 2rem;
+  color: var(--gold);
+  text-shadow: 0 0 18px rgba(255, 216, 138, 0.55);
+  letter-spacing: 2px;
 }
 .play-btn {
-  width: 200px;
-  height: 70px;
-  font-size: 1.3rem;
-  background: linear-gradient(160deg, var(--cyan) 0%, #3f9fd6 100%);
-  color: #072437;
-}
-
-/* ================= Minimalist Game Cards ================= */
-.game-select-screen {
   width: 100%;
-  max-width: 100%;
-  padding: 16px;
-  gap: 12px;
-}
-.game-grid {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 0 8px;
-}
-.game-card {
-  position: relative;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 16px;
-  appearance: none;
-  -webkit-appearance: none;
   border: none;
-  border-radius: 16px;
-  overflow: hidden;
+  border-radius: 18px;
+  padding: 16px 10px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #072437;
   cursor: pointer;
-  padding: 0;
-  margin: 0;
-  width: 100%;
-  height: 80px;
-  flex: 0 0 auto;
-  background: var(--panel-deep);
-  box-shadow: 0 6px 16px rgba(2, 4, 20, 0.4), 0 1px 0 rgba(255, 255, 255, 0.1) inset;
-  transition: transform 0.1s;
+  background: linear-gradient(160deg, var(--cyan) 0%, #3f9fd6 100%);
+  box-shadow: 0 10px 20px rgba(2, 4, 16, 0.45), 0 2px 0 rgba(255, 255, 255, 0.35) inset;
 }
-.game-card:active { transform: scale(0.98); }
-.game-card--soon { opacity: 0.4; cursor: not-allowed; }
+.play-btn:active { transform: scale(0.96); }
 
+/* ================= Game Card Image Fix ================= */
+.game-card {
+  aspect-ratio: 16 / 9;
+  min-height: unset;
+}
 .game-card-art {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 72px;
-  height: 100%;
   object-fit: cover;
-  display: block;
-  border-radius: 16px 0 0 16px;
-}
-
-.game-card-info {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-  flex: 1;
-  padding-left: 88px;
-}
-.game-card-title {
-  font-family: 'Baloo 2', sans-serif;
-  font-weight: 700;
-  font-size: 1.05rem;
-  color: #eef2ff;
-  text-align: left;
-}
-.game-card-sub {
-  font-family: 'Poppins', sans-serif;
-  font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.55);
-  text-align: left;
-}
-
-.game-card-highscore {
-  position: absolute;
-  top: 6px;
-  right: 10px;
-  background: rgba(4, 8, 28, 0.72);
-  color: var(--gold);
-  font-family: 'Baloo 2', sans-serif;
-  font-size: 0.6rem;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 8px;
-}
-
-/* ================= Full-Screen Override ================= */
-#app-root {
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.screen {
-  width: 100%;
-  max-width: 480px;
-  height: 100%;
-  max-height: 100vh;
-  padding: 16px;
+  object-position: center;
 }
