@@ -8,20 +8,20 @@ import i18n from '../../core/I18nManager.js';
 
 function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
 
-const MOON_IMAGES = [
-  'assets/images/moon-1.png',
-  'assets/images/moon-2.png',
-  'assets/images/moon-3.png',
-  'assets/images/moon-4.png',
-  'assets/images/moon-5.png',
-  'assets/images/moon-6.png',
+const PLANET_IMAGES = [
+  'assets/images/planet-1.png',
+  'assets/images/planet-2.png',
+  'assets/images/planet-3.png',
+  'assets/images/planet-4.png',
+  'assets/images/planet-5.png',
+  'assets/images/planet-6.png',
 ];
 const STAR_IMAGES = [
-  'assets/images/star-1.png',
-  'assets/images/star-2.png',
-  'assets/images/star-3.png',
-  'assets/images/star-4.png',
-  'assets/images/star-5.png',
+  'assets/images/planet-7.png',
+  'assets/images/planet-8.png',
+  'assets/images/planet-9.png',
+  'assets/images/planet-10.png',
+  'assets/images/planet-11.png',
 ];
 
 const MAX_LEVEL = 11;
@@ -399,7 +399,7 @@ export default class PlanetMergeGame extends BaseGame {
     ctx.save();
     ctx.globalAlpha = alpha;
 
-    const imgList = isStar ? STAR_IMAGES : MOON_IMAGES;
+    const imgList = isStar ? STAR_IMAGES : PLANET_IMAGES;
     const url = imgList[(level - 1) % imgList.length];
     // Use drawCircularSprite for perfect circular fit matching the physics radius
     const drew = drawCircularSprite(ctx, url, x, y, r * 2.1);
