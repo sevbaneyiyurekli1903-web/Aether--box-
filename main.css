@@ -1,0 +1,526 @@
+/* =========================================================
+   Aether Hub — main.css
+   "Premium 3D Crystal & Deep Blue" theme.
+   Neon/cyberpunk theme fully retired — solid drop-shadows on
+   rounded 3D buttons/cards instead of thin glowing borders.
+   ========================================================= */
+
+@import url('../fonts/fonts.css');
+
+:root {
+  /* deep blue gradient stops */
+  --blue-top: #1c2f7a;
+  --blue-mid: #101a5c;
+  --blue-deep: #04081c;
+
+  /* pastel crystal accents, pulled from the logo's palette */
+  --cyan: #8fe8ff;
+  --pink: #ffb0e0;
+  --purple: #c3a6ff;
+  --gold: #ffd88a;
+  --gold-deep: #e8a83c;
+
+  --panel: #17226e;
+  --panel-deep: #0e1650;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+html, body {
+  width: 100%;
+  min-height: 100%;
+  color: #f3f6ff;
+  font-family: 'Poppins', sans-serif;
+  overflow-x: hidden;
+}
+
+body {
+  background: radial-gradient(ellipse at 50% -10%, var(--blue-top) 0%, var(--blue-mid) 48%, var(--blue-deep) 100%);
+  min-height: 100vh;
+}
+
+#app-root {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.hidden { display: none !important; }
+
+.screen {
+  width: 100%;
+  max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.screen-title {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 1px;
+  color: var(--gold);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+
+/* ================= Crystal 3D buttons (replaces .neon-btn) ================= */
+.crystal-btn {
+  border: none;
+  border-radius: 20px;
+  padding: 14px 24px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  color: #eef2ff;
+  cursor: pointer;
+  background: linear-gradient(160deg, #3a52c4 0%, var(--panel-deep) 100%);
+  box-shadow:
+    0 10px 22px rgba(2, 4, 20, 0.5),
+    0 2px 0 rgba(255, 255, 255, 0.18) inset,
+    0 -8px 16px rgba(0, 0, 0, 0.3) inset;
+}
+.crystal-btn:active { transform: scale(0.95); }
+.crystal-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.back-btn { align-self: flex-start; }
+
+/* ================= Main Menu ================= */
+.crystal-logo {
+  width: min(62vw, 240px);
+  filter:
+    drop-shadow(0 0 26px rgba(143, 232, 255, 0.55))
+    drop-shadow(0 12px 22px rgba(0, 0, 0, 0.45));
+  margin-bottom: 4px;
+}
+.crystal-logo--missing {
+  min-height: 160px;
+  width: min(62vw, 240px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 2px dashed rgba(255, 255, 255, 0.28);
+  border-radius: 24px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+}
+
+.main-btn { width: 230px; }
+.main-btn--primary {
+  background: linear-gradient(160deg, var(--cyan) 0%, #3f9fd6 100%);
+  color: #072437;
+  font-size: 1rem;
+  padding: 16px 24px;
+}
+.main-btn--gold {
+  background: linear-gradient(160deg, var(--gold) 0%, var(--gold-deep) 100%);
+  color: #402a00;
+}
+.main-btn--ghost {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 6px 14px rgba(2, 4, 20, 0.4), 0 2px 0 rgba(255, 255, 255, 0.12) inset;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* ================= Game Select (Intermediate Menu) =================
+   Single vertical column -- games stacked one under another (not side
+   by side). The screen itself scrolls internally (see
+   .game-select-screen below) since 8 stacked banner cards are taller
+   than most viewports. */
+.game-grid {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.game-card {
+  position: relative;
+  display: block;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  border-radius: 20px;
+  overflow: hidden;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: auto;
+  min-height: 110px;
+  flex: 0 0 auto;
+  background: var(--panel-deep);
+  box-shadow:
+    0 10px 20px rgba(2, 4, 20, 0.55),
+    0 2px 0 rgba(255, 255, 255, 0.15) inset;
+}
+.game-card:active { transform: scale(0.97); }
+.game-card--soon { opacity: 0.4; cursor: not-allowed; }
+.game-card--art-error { background: repeating-linear-gradient(45deg, var(--panel-deep), var(--panel-deep) 10px, var(--panel) 10px, var(--panel) 20px); }
+.game-card-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.game-card-highscore {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(4, 8, 28, 0.72);
+  color: var(--gold);
+  font-family: 'Baloo 2', sans-serif;
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 8px;
+}
+/* The intermediate menu is the one screen taller than its content, so
+   it scrolls internally instead of overflowing the centered #app-root
+   both above and below the fold. */
+.game-select-screen {
+  max-height: 100vh;
+  max-height: 100dvh;
+  overflow-y: auto;
+  padding: 4px 2px 24px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ================= Game viewport (fullscreen, no letterboxing) =================
+   The viewport now IS the screen: position:fixed + inset:0, no
+   max-width/max-height cap and no centering box around it. That
+   structurally kills the old "drift on non-2:3 aspect ratios" bug at
+   the root, rather than patching it -- there is no separate coordinate
+   system for a HUD to drift away from, because the HUD is positioned
+   inside this exact same fixed, screen-filling container.
+   It also kills the dark bars that used to show around the play area:
+   the canvas inside now cover-fits this box (see .game-canvas-wrapper
+   canvas below), so every game's own background reaches every edge --
+   including the area behind the EXIT button, which now floats on top
+   of the canvas instead of living in its own reserved strip above it. */
+#game-viewport {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ================= HUD (floats directly over the canvas) =================
+   EXIT lives in the screen's top-left corner, per spec. Score/Best sit
+   top-center, out of the way of any game's own on-canvas UI (several
+   games draw their own "NEXT" boxes etc. in the top-right corner).
+   Both float above the canvas as absolutely-positioned children of the
+   same #game-viewport the canvas fills -- one shared coordinate system,
+   so nothing here can drift apart from the game area on any device. */
+.exit-btn {
+  position: absolute;
+  top: max(14px, env(safe-area-inset-top));
+  left: max(14px, env(safe-area-inset-left));
+  z-index: 5;
+  padding: 10px 18px;
+  font-size: 0.72rem;
+}
+.score-hud-group {
+  position: absolute;
+  top: max(14px, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  gap: 8px;
+  pointer-events: none; /* purely informational -- never blocks a tap meant for gameplay underneath */
+}
+.best-score-hud, .live-score-hud {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 0.72rem;
+  background: rgba(4, 8, 28, 0.78);
+  padding: 6px 12px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(2, 4, 20, 0.5);
+  white-space: nowrap;
+}
+.best-score-hud {
+  color: var(--gold);
+  text-shadow: 0 0 6px rgba(255, 216, 138, 0.5);
+}
+.live-score-hud {
+  color: var(--cyan);
+  text-shadow: 0 0 6px rgba(143, 232, 255, 0.5);
+}
+
+/* The canvas slot fills the entire viewport -- it no longer shares
+   space with reserved HUD bands, which is what let the old fixed 2:3
+   canvas letterbox (and show a flat-colored gap) on other ratios. */
+#game-canvas-slot {
+  position: absolute;
+  inset: 0;
+}
+
+/* ================= Planet Merge's two jokers (game-specific, not shared) =================
+   Everywhere else in the hub the generic ad-joker button has been
+   removed entirely, per spec -- these two exist ONLY inside Planet
+   Merge's own canvas wrapper (built by PlanetMergeGame itself, not by
+   the shared HUD), bottom corners, clear of EXIT/score up top. */
+.planet-joker-btn {
+  position: absolute;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  z-index: 5;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: none;
+  font-size: 1.35rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: linear-gradient(160deg, #3a52c4 0%, var(--panel-deep) 100%);
+  box-shadow:
+    0 10px 20px rgba(2, 4, 20, 0.55),
+    0 2px 0 rgba(255, 255, 255, 0.2) inset;
+}
+.planet-joker-btn:active { transform: scale(0.92); }
+.planet-joker-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.planet-joker-btn--shake { left: max(16px, env(safe-area-inset-left)); }
+.planet-joker-btn--bomb { right: max(16px, env(safe-area-inset-right)); }
+.planet-joker-btn.is-busy { animation: joker-pulse 0.7s ease-in-out infinite; }
+.planet-joker-btn.is-armed {
+  box-shadow:
+    0 0 0 3px var(--gold),
+    0 10px 20px rgba(2, 4, 20, 0.55),
+    0 2px 0 rgba(255, 255, 255, 0.2) inset;
+  animation: joker-armed-glow 1s ease-in-out infinite;
+}
+@keyframes joker-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.85; }
+}
+@keyframes joker-armed-glow {
+  0%, 100% { box-shadow: 0 0 0 3px var(--gold), 0 10px 20px rgba(2, 4, 20, 0.55), 0 2px 0 rgba(255, 255, 255, 0.2) inset; }
+  50% { box-shadow: 0 0 0 6px rgba(255, 216, 138, 0.35), 0 10px 20px rgba(2, 4, 20, 0.55), 0 2px 0 rgba(255, 255, 255, 0.2) inset; }
+}
+
+/* ================= Revive overlay (strict layout) ================= */
+.revive-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(4, 8, 28, 0.84);
+  backdrop-filter: blur(3px);
+}
+.revive-panel {
+  width: min(78vw, 300px);
+  background: linear-gradient(160deg, #33469e 0%, var(--panel-deep) 100%);
+  border-radius: 28px;
+  padding: 30px 22px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  box-shadow: 0 18px 40px rgba(2, 4, 16, 0.6), 0 2px 0 rgba(255, 255, 255, 0.15) inset;
+}
+.revive-countdown {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 800;
+  font-size: 2.6rem;
+  color: var(--gold);
+  text-shadow: 0 0 18px rgba(255, 216, 138, 0.55);
+  line-height: 1;
+}
+.revive-watch-btn {
+  width: 100%;
+  border: none;
+  border-radius: 18px;
+  padding: 15px 10px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #402a00;
+  cursor: pointer;
+  background: linear-gradient(160deg, var(--gold) 0%, var(--gold-deep) 100%);
+  box-shadow: 0 10px 20px rgba(2, 4, 16, 0.45), 0 2px 0 rgba(255, 255, 255, 0.35) inset;
+}
+.revive-watch-btn:active { transform: scale(0.96); }
+
+/* The crucial detail: sits OUTSIDE/below the panel as a sibling, not
+   a second button inside it. */
+.revive-decline {
+  margin-top: 20px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.62);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ================= Interstitial ad overlay (Infinite Ad Mode) ================= */
+.ad-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+}
+.ad-overlay-label {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: 3px;
+  color: var(--gold);
+  text-shadow: 0 0 16px rgba(255, 216, 138, 0.6);
+}
+
+/* ================= Settings ================= */
+.settings-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 4px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.85rem;
+}
+.settings-row input[type="range"] { flex: 1; accent-color: var(--cyan); }
+
+/* ================= Fallback in-game placeholder ================= */
+.game-placeholder {
+  width: 100%;
+  max-width: 360px;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+  border-radius: 24px;
+  background: var(--panel-deep);
+  box-shadow: 0 12px 22px rgba(2, 4, 20, 0.5);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* ================= Canvas-based games share this wrapper =================
+   Fills the entire screen-sized #game-canvas-slot. No rounded corners/
+   frame anymore -- the game IS the screen now, edge to edge, per spec
+   ("arka plan ekranın tamamını kaplasın"). overflow:hidden is what
+   crops the cover-fit canvas below instead of letting it push the
+   layout around; the near-black fallback only shows for a single
+   frame before JS sizes the canvas, never in steady state. */
+.game-canvas-wrapper {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #02040c;
+}
+.game-canvas-wrapper canvas {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: block;
+  touch-action: none;
+}
+/* ================= Loading Screen ================= */
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #02040c;
+  transition: opacity 0.4s ease;
+}
+.loading-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+.loading-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* ================= Play Screen ================= */
+.play-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(4, 8, 28, 0.92);
+  backdrop-filter: blur(4px);
+  transition: opacity 0.3s ease;
+}
+.play-overlay.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+.play-panel {
+  width: min(78vw, 300px);
+  background: linear-gradient(160deg, #33469e 0%, var(--panel-deep) 100%);
+  border-radius: 28px;
+  padding: 36px 24px 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  box-shadow: 0 18px 40px rgba(2, 4, 16, 0.6), 0 2px 0 rgba(255, 255, 255, 0.15) inset;
+}
+.play-title {
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 800;
+  font-size: 2rem;
+  color: var(--gold);
+  text-shadow: 0 0 18px rgba(255, 216, 138, 0.55);
+  letter-spacing: 2px;
+}
+.play-btn {
+  width: 100%;
+  border: none;
+  border-radius: 18px;
+  padding: 16px 10px;
+  font-family: 'Baloo 2', sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  color: #072437;
+  cursor: pointer;
+  background: linear-gradient(160deg, var(--cyan) 0%, #3f9fd6 100%);
+  box-shadow: 0 10px 20px rgba(2, 4, 16, 0.45), 0 2px 0 rgba(255, 255, 255, 0.35) inset;
+}
+.play-btn:active { transform: scale(0.96); }
+
+/* ================= Game Card Image Fix ================= */
+.game-card {
+  aspect-ratio: 16 / 9;
+  min-height: unset;
+}
+.game-card-art {
+  object-fit: cover;
+  object-position: center;
+}
