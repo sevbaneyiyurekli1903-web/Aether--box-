@@ -614,19 +614,25 @@ export default class NeonRiderGame extends BaseGame {
       ctx.fillStyle = themeColor;
       ctx.shadowColor = themeColor;
       ctx.shadowBlur = 20;
-      // Car body
-      ctx.beginPath();
-      ctx.moveTo(-20, 10);
-      ctx.lineTo(20, 10);
-      ctx.lineTo(18, -6);
-      ctx.lineTo(-10, -10);
-      ctx.lineTo(-20, -4);
-      ctx.closePath();
-      ctx.fill();
-      // Wheels
-      ctx.fillStyle = '#ffffff';
-      ctx.beginPath(); ctx.arc(-12, 10, 5, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(12, 10, 5, 0, Math.PI * 2); ctx.fill();
+      // Car image
+      const carImg = new Image();
+      carImg.src = 'assets/images/neon-rider-player.png';
+      if (carImg.complete && carImg.naturalWidth > 0) {
+        ctx.drawImage(carImg, -30, -20, 60, 40);
+      } else {
+        // Fallback: geometric car
+        ctx.beginPath();
+        ctx.moveTo(-20, 10);
+        ctx.lineTo(20, 10);
+        ctx.lineTo(18, -6);
+        ctx.lineTo(-10, -10);
+        ctx.lineTo(-20, -4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(-12, 10, 5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(12, 10, 5, 0, Math.PI * 2); ctx.fill();
+      }
       ctx.shadowBlur = 0;
       ctx.restore();
     }
