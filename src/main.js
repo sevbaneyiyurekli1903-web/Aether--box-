@@ -3,7 +3,6 @@ import { LoadingScreen } from './ui/screens/LoadingScreen.js';
 import bus from './core/EventBus.js';
 import { EVENTS } from './core/Events.js';
 import gameManager from './core/GameManager.js';
-import './core/AudioManager.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   const root = document.getElementById('app-root');
